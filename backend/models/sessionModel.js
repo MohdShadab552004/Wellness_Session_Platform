@@ -8,7 +8,6 @@ const sessionSchema = new mongoose.Schema({
     },
     title: {
         type: String,
-        required: true
     },
     tags: {
         type: [String],
@@ -16,7 +15,6 @@ const sessionSchema = new mongoose.Schema({
     },
     json_file_url: {
         type: String, 
-        required: true
     },
     status: {
         type: String,

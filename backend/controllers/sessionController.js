@@ -34,28 +34,47 @@ export const getSingleSession = async (req, res) => {
 
 // Save or update draft
 export const saveDraft = async (req, res) => {
-  const { title, tags, json_file_url } = req.body;
+  console.log("save")
+  const { title, tags, json_file_url, sessionId } = req.body;
   const userId = req.user.userId;
-
-  if (!title || !json_file_url) {
-    return res.status(400).json({ error: "Title and JSON file URL are required" });
-  }
-
   try {
-    const session = await Session.findOneAndUpdate(
-      { user_id: userId },
-      { title, tags, json_file_url, status: "draft", updated_at: new Date(), user_id: userId },
-      { upsert: true, new: true, setDefaultsOnInsert: true }
-    );
+    let session;
+
+    // Prepare only defined fields for update
+    const updateFields = {};
+    if (title !== undefined) updateFields.title = title;
+    if (tags !== undefined) updateFields.tags = tags;
+    if (json_file_url !== undefined) updateFields.json_file_url = json_file_url;
+
+    updateFields.updated_at = new Date();
+    if (sessionId) {
+      // Update existing session
+      session = await Session.findOneAndUpdate(
+        { _id: sessionId, user_id: userId },
+        { $set: updateFields },
+        { new: true }
+      );
+    } else {
+      // Create new session
+      session = new Session({
+        user_id: userId,
+        ...updateFields,
+        status: "draft"
+      });
+      await session.save();
+    }
+
     res.json(session);
   } catch (err) {
-    res.status(400).json({ error: "Failed to save draft", details: err.message });
+    res.status(500).json({ error: "Failed to save draft", details: err.message });
   }
 };
 
+
+
 // Publish session
 export const publishSession = async (req, res) => {
-  const { title, tags, json_file_url } = req.body;
+  const { title, tags, json_file_url, sessionId } = req.body;
   const userId = req.user.userId;
 
   if (!title || !json_file_url) {
@@ -63,12 +82,25 @@ export const publishSession = async (req, res) => {
   }
 
   try {
-    const session = await Session.findOneAndUpdate(
-      { user_id: userId },
+
+    let session 
+    if(sessionId){
+    session = await Session.findOneAndUpdate(
+      { _id: sessionId, user_id: userId },
       { title, tags, json_file_url, status: "published", updated_at: new Date() },
       { new: true }
     );
-    if (!session) return res.status(404).json({ error: "Session not found" });
+  }else{
+    session = new Session({
+        user_id: userId,
+        title,
+        tags,
+        json_file_url,
+        status: "published",
+        updated_at: new Date()
+      })
+    await session.save();
+  }
     res.json(session);
   } catch (err) {
     res.status(400).json({ error: "Failed to publish session", details: err.message });

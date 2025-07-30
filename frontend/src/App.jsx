@@ -1,35 +1,53 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import React from 'react';
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import Header from './components/Header';
+import Dashboard from './pages/Dashboard';
+import MySessions from './pages/MySessions';
+import SessionEditor from './pages/SessionEditor';
+import Login from './pages/Login';
+import Register from './pages/Register';
+import ProtectedRoute from './components/ProtectedRoute'; 
 
-function App() {
-  const [count, setCount] = useState(0)
-
+const App = () => {
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
-}
+    <div>
+      <BrowserRouter>
+        <Header />
+        <Routes>
+          <Route path='/login' element={<Login />} />
+          <Route path='/register' element={<Register />} />
+          <Route path='/' element={<Navigate to='/dashboard' />} />
+          <Route path='/dashboard' element={<Dashboard />} />
 
-export default App
+          {/*  Protected routes */}
+          <Route
+            path='/my-sessions'
+            element={
+              <ProtectedRoute>
+                <MySessions />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path='/session-editor'
+            element={
+              <ProtectedRoute>
+                <SessionEditor />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path='/session-editor/:id'
+            element={
+              <ProtectedRoute>
+                <SessionEditor />
+              </ProtectedRoute>
+            }
+          />
+        </Routes>
+      </BrowserRouter>
+    </div>
+  );
+};
+
+export default App;
