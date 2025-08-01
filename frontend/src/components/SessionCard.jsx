@@ -43,6 +43,7 @@ const SessionCard = ({ session, showEdit = false }) => {
             </span>
             <Link
             to={`/session-editor/${session._id}`}
+            state={session}
               className="px-3 py-1 rounded text-sm hover:bg-opacity-70 transition-colors"
               style={{ backgroundColor: colors.primary, color: colors.text }}
             >

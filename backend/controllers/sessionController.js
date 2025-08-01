@@ -45,6 +45,7 @@ export const saveDraft = async (req, res) => {
     if (title !== undefined) updateFields.title = title;
     if (tags !== undefined) updateFields.tags = tags;
     if (json_file_url !== undefined) updateFields.json_file_url = json_file_url;
+    updateFields.status = 'draft';
 
     updateFields.updated_at = new Date();
     if (sessionId) {

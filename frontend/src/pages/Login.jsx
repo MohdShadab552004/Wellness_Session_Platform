@@ -1,31 +1,47 @@
-import React from 'react';
+import React, { useState, useContext } from 'react';
 import colors from '../color';
 import { motion } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
+import {toast,Toaster} from 'react-hot-toast'; 
+import { CircleLoader } from 'react-spinners'; 
+import { AuthContext } from '../context/authContext';
 
 const Login = () => {
-  const {
-    register,
-    handleSubmit,
-    formState: { errors }
-  } = useForm();
-
+  const [loading, setLoading] = useState(false);
+  const { register, handleSubmit, formState: { errors } } = useForm();
   const navigate = useNavigate();
+  const { isLogin, setIsLogin } = useContext(AuthContext);
+  
 
   const onSubmit = async (data) => {
-    const response = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/login`,{
-      method: 'POST',
-      headers:{
-        'Content-Type' : 'application/json'
-      },
-      body : JSON.stringify(data)
-    })
-    const result = await response.json();
-    localStorage.setItem('token',result.token);
+    setLoading(true); // Start loading
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
 
-    navigate('/dashboard');
-    console.log("done");
+      const result = await response.json();
+      console.log(result);
+
+      if (response.ok && result.token) {
+        setIsLogin(true);
+        localStorage.setItem('token', result.token);
+        navigate('/dashboard');
+        toast.success('Login successful!');
+      } else {
+        toast.error(result.message || 'Invalid credentials, please try again.');
+      }
+    } catch (error) {
+      console.error('Error during login:', error);
+      toast.error('An error occurred. Please try again later.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -35,6 +51,7 @@ const Login = () => {
       exit={{ opacity: 0 }}
       className="flex items-center justify-center min-h-screen"
     >
+      <Toaster />
       <div
         className="w-full max-w-md p-8 rounded-lg shadow-xl"
         style={{ backgroundColor: colors.primary }}
@@ -92,13 +109,19 @@ const Login = () => {
             )}
           </div>
 
-          {/* Submit */}
+          {/* Submit Button */}
           <button
             type="submit"
             className="w-full py-2 rounded-lg shadow hover:shadow-md transition-all mb-4"
             style={{ backgroundColor: colors.accent, color: colors.text }}
           >
-            Login
+            {loading ? (
+              <div className="flex justify-center">
+                <CircleLoader color={colors.text} size={24} />
+              </div>
+            ) : (
+              'Login'
+            )}
           </button>
 
           {/* Link to Register */}

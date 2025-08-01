@@ -7,10 +7,10 @@ import SessionEditor from './pages/SessionEditor';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import ProtectedRoute from './components/ProtectedRoute'; 
-
+import { AuthProvider } from './context/authContext';
 const App = () => {
   return (
-    <div>
+    <AuthProvider> {/* Wrap your app with UserProvider */}
       <BrowserRouter>
         <Header />
         <Routes>
@@ -46,7 +46,7 @@ const App = () => {
           />
         </Routes>
       </BrowserRouter>
-    </div>
+    </AuthProvider>
   );
 };
 
